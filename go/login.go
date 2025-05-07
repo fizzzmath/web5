@@ -39,7 +39,7 @@ type (
 	}
 
 	formResponse struct {
-		Login string
+		ID string
 		Application Application
 		Errors Errors
 		Message string
@@ -60,13 +60,13 @@ func dataIsCorrect(login string, password string) (bool, error) {
 	sel, err := db.Query(`
 		SELECT PASSWORD
 		FROM USER
-		WHERE LOGIN = '?';
+		WHERE LOGIN = ?;
 	`, login)
 	
 	if err != nil {
 		return false, err
 	}
-	
+
 	defer sel.Close();
 
 	for sel.Next() {
