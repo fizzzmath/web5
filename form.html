@@ -14,10 +14,10 @@
             <input type="text" id="fio" name="fio" placeholder="Введите ФИО" {{ $fio := .Application.Fio }} {{ if $fio }} value="{{ $fio }}" {{ end }}>
 
             <label for="phone">Телефон:</label>
-            <input type="tel" id="phone" name="phone" placeholder="Введите телефон" value="{{ .Application.Phone }}">
+            <input type="tel" id="phone" name="phone" placeholder="Введите телефон" {{ $phone := .Application.Phone }} {{ if $phone }} value="{{ $phone }}" {{ end }}>
 
             <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" placeholder="Введите e-mail" value="{{ .Application.Email }}">
+            <input type="email" id="email" name="email" placeholder="Введите e-mail" {{ $email := .Application.Email }} {{ $email }} value="{{ $email }}" {{ end }}>
 
             <label for="birthdate">Дата рождения:</label>
             <input type="date" id="birthdate" name="birthdate" value="{{ .Application.Birthdate }}">
@@ -47,7 +47,7 @@
             </select>
 
             <label for="bio">Биография:</label>
-            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ .Application.Bio }}</textarea>
+            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }} {{ if $bio }} $bio {{ end }}</textarea>
 
             <label>
                 <input type="checkbox" id="agreement" name="agreement" required>
