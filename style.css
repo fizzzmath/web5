@@ -100,16 +100,30 @@ button:hover {
     background-color: #fff;
 }
 
-.success {
+.message {
     border: 1px solid #0f0;
     color: #0f0;
 }
 
-.error {
-    color: red;
-    font-size: 12px;
+.warning {
+    font-size: 14px;
     margin-top: -5px;
     margin-bottom: 10px;
+}
+
+.warning_red {
+    color: red;
+}
+
+.warning_green {
+    color: #0f0;
+}
+
+.error {
+    font-size: 14px;
+    color: red;
+    margin-top: -5px;
+    
 }
 
 input.error__input, select.error__input, textarea.error__input {

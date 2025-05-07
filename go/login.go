@@ -47,11 +47,6 @@ type (
 		Errors Errors
 		Message string
 	}
-
-	Payload struct {
-		Email string
-		jwt.RegisteredClaims
-	}
 )
 
 func (fr FormResponse) Contains(lang string) bool {
@@ -164,11 +159,8 @@ func getApplication(id string) (Application, error) {
 }
 
 func grantAccessToken(w http.ResponseWriter, email string) {
-	payload := Payload{
-		Email: email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-		},
+	payload := jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 	}
 	key := []byte("access-token-secret-key")
 
@@ -224,7 +216,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !valid {
-			response.Type = "error"
+			response.Type = "warning_red"
 			response.Message = "Неверные логин или пароль"
 			tmpl.Execute(w, response)
 			return
@@ -246,7 +238,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		grantAccessToken(w, response.Application.Email)
+		grantAccessToken(w, response.ID)
 
 		tmpl.Execute(w, response)
 		return

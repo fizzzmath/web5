@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"regexp"
 	"text/template"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func validate(appl Application) Errors {
@@ -72,6 +74,20 @@ func (e Errors) Count() int {
 	return count
 }
 
+func isAuthorized(r *http.Request) bool {
+	cookie, err := r.Cookie("accessToken")
+
+	if err != nil {
+		return false
+	}
+
+	token, err := jwt.ParseWithClaims(cookie.Value, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("access-token-secret-key"), nil
+	})
+
+	return err == nil && token.Valid
+}
+
 func formHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("form.html")
 
@@ -90,6 +106,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		id := r.URL.Query().Get("id")
 		appl := Application{
 			Fio: r.FormValue("fio"),
 			Phone: r.FormValue("phone"),
@@ -99,11 +116,10 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 			Bio: r.FormValue("bio"),
 			Langs: r.PostForm["langs[]"],
 		}
-
 		errors := validate(appl)
 
 		response = FormResponse{
-			ID: r.URL.Query().Get("id"),
+			ID: id,
 			Application: appl,
 			Errors: errors,
 		}
@@ -113,11 +129,48 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// if response.ID == "" {
-		// 	insertApplication(appl)
-		// } else {
-		// 	updateApplication(appl)
-		// }
+		if response.ID != "" && isAuthorized(r) {
+			// err := updateApplication(appl)
+
+			// if err != nil {
+			// 	fmt.Fprintf(w, "MySQL error: %v", err)
+			// 	return
+			// }
+
+			response.Message = "Ваши данные успешно изменены!"
+
+			tmpl.Execute(w, response)
+			return
+		}
+
+		response := LoginResponse{}
+		
+		if id != "" {
+			response.Type = "warning_red"
+			response.Message = "Для выполнения этого действия необходимо авторизоваться"
+		} else {
+			//insertApplication(appl)
+			//login, password, err := generateLAP()
+
+			// if err != nil {
+			// 	fmt.Fprintf(w, "MySQL error: %v", err)
+			// 	return
+			// }
+
+			response.Login = "u0000002";
+			response.Password = "qwertyman2345678";
+			response.Type = "warning_green"
+			response.Message = "Вы успешно зарегистрировались. Перед нажатием на кнопку Войти сохраните ваш логин и пароль!"
+		}
+
+		tmpl, err := template.ParseFiles("login.html")
+
+		if err != nil {
+			fmt.Fprintf(w, "Template error: %v", err)
+			return
+		}
+
+		tmpl.Execute(w, response)
 	}
 
 	tmpl.Execute(w, response)
