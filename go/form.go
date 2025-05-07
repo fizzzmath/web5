@@ -171,6 +171,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		tmpl.Execute(w, response)
+		return
 	}
 
 	tmpl.Execute(w, response)
