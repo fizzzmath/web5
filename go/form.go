@@ -91,7 +91,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		appl := Application{
-			Fio: r.FormValue("name"),
+			Fio: r.FormValue("fio"),
 			Phone: r.FormValue("phone"),
 			Email: r.FormValue("email"),
 			Birthdate: r.FormValue("birthdate"),
