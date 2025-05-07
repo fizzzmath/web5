@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задание 5</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Войдите</h2>
+
+        <form action="main.cgi" method="post">
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login">
+
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password">
+
+            <div class="error"></div>
+
+            <button type="submit">Войти</button>
+        </form>
+
+        <a href="main.cgi?action=form">🤷‍♂️ У меня нет логина и пароля</a>
+    </div>
+</body>
+</html>
