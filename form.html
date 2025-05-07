@@ -11,7 +11,7 @@
         <h2>Добро пожаловать!</h2>
         <form action="main.cgi" method="post">
             <label for="fio">ФИО:</label>
-            <input type="text" id="fio" name="fio" placeholder="Введите ФИО" value="{{ .Application.Fio }}">
+            <input type="text" id="fio" name="fio" placeholder="Введите ФИО" {{ $fio := .Application.Fio }} {{ if $fio }} value="{{ $fio }}" {{ end }}>
 
             <label for="phone">Телефон:</label>
             <input type="tel" id="phone" name="phone" placeholder="Введите телефон" value="{{ .Application.Phone }}">
