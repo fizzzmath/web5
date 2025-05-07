@@ -52,7 +52,7 @@
             <p class="error">{{ $langsErr := .Errors.Langs }}{{ if $langsErr }}{{ $langsErr }}{{ end }}</p>
 
             <label for="bio">Биография:</label>
-            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }}{{ if $bio }} $bio {{ end }}</textarea>
+            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }}{{ if $bio }}{{ $bio }}{{ end }}</textarea>
             <p class="error">{{ $bioErr := .Errors.Bio }}{{ if $bioErr }}{{ $bioErr }}{{ end }}</p>
 
             <label>
