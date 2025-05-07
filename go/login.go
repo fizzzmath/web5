@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"regexp"
 	"text/template"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type (
@@ -43,6 +46,11 @@ type (
 		Application Application
 		Errors Errors
 		Message string
+	}
+
+	Payload struct {
+		Email string
+		jwt.RegisteredClaims
 	}
 )
 
@@ -80,6 +88,97 @@ func dataIsCorrect(login string, password string) (bool, error) {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(password))) == p, nil
 }
 
+func extractID(login string) string {
+	re := regexp.MustCompile(`[1-9][0-9]*`)
+
+	return string(re.Find([]byte(login)))
+}
+
+func getApplication(id string) (Application, error) {
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return Application{}, err
+	}
+
+	defer db.Close();
+
+	appl := Application{}
+
+	sel, err := db.Query(`
+		SELECT *
+		FROM APPLICATION
+		WHERE ID = ?;
+	`, id)
+
+	if err != nil {
+		return appl, err
+	}
+
+	defer sel.Close();
+
+	for sel.Next() {
+		err := sel.Scan(&id, &appl.Fio, &appl.Phone, &appl.Email, &appl.Birthdate, &appl.Gender, &appl.Bio)
+
+		if err != nil {
+			return appl, err
+		}
+	}
+
+	sel, err = db.Query(`
+		SELECT NAME
+		FROM FAVORITE_PL fav
+		JOIN PL pl ON fav.PL_ID = pl.ID
+		WHERE APPLICATION_ID = ?;
+	`, id)
+
+	if err != nil {
+		return appl, err
+	}
+
+	defer sel.Close();
+
+	for sel.Next() {
+		var pl string
+
+		err := sel.Scan(&pl)
+
+		if err != nil {
+			return appl, err
+		}
+
+		appl.Langs = append(appl.Langs, pl)
+	}
+
+	return appl, nil
+}
+
+func grantAccessToken(w http.ResponseWriter, email string) {
+	payload := Payload{
+		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+		},
+	}
+	key := []byte("access-token-secret-key")
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	t, err := accessToken.SignedString(key)
+
+	if err != nil {
+		fmt.Fprintf(w, "Ошибка при создании токена: %v", err)
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name: "accessToken",
+		Value: t,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("login.html")
 
@@ -115,7 +214,16 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response := loginResponse{Login: login}
+		response := formResponse{ID: extractID(login)}
+
+		response.Application, err = getApplication(response.ID)
+
+		if err != nil {
+			fmt.Fprintf(w, "MySQL error: %v", err)
+			return
+		}
+
+		grantAccessToken(w, response.Application.Email)
 
 		tmpl.Execute(w, response)
 		return
