@@ -54,6 +54,16 @@ type (
 	}
 )
 
+func (fr formResponse) Contains(lang string) bool {
+	for _, s := range fr.Application.Langs {
+		if s == lang {
+			return true
+		}
+	}
+
+	return false
+}
+
 func dataIsCorrect(login string, password string) (bool, error) {
 	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
 
