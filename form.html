@@ -12,15 +12,18 @@
         <form action="main.cgi" method="post">
             <label for="fio">ФИО:</label>
             <input type="text" id="fio" name="fio" placeholder="Введите ФИО" {{ $fio := .Application.Fio }} {{ if $fio }} value="{{ $fio }}" {{ end }}>
+            <p class="error">{{ $fioErr := .Errors.Fio }}{{ if $fioErr }}{{ $fioErr }}{{ end }}</p>
 
             <label for="phone">Телефон:</label>
             <input type="tel" id="phone" name="phone" placeholder="Введите телефон" {{ $phone := .Application.Phone }} {{ if $phone }} value="{{ $phone }}" {{ end }}>
+            <p class="error">{{ $phoneErr := .Errors.Phone }}{{ if $phoneErr }}{{ $phoneErr }}{{ end }}</p>
 
             <label for="email">E-mail:</label>
             <input type="email" id="email" name="email" placeholder="Введите e-mail" {{ $email := .Application.Email }} {{ if $email }} value="{{ $email }}" {{ end }}>
 
             <label for="birthdate">Дата рождения:</label>
             <input type="date" id="birthdate" name="birthdate" value="{{ .Application.Birthdate }}">
+            <p class="error">{{ $birthdateErr := .Errors.Birthdate }}{{ if $birthdateErr }}{{ $birthdateErr }}{{ end }}</p>
 
             <div class="gender">
                 <label>Пол:</label>
@@ -29,6 +32,7 @@
                 <input type="radio" id="female" name="gender" value="female" {{ if eq .Application.Gender "female" }} checked {{ end }}>
                 <label for="female">Женский</label>
             </div>
+            <p class="error">{{ $genderErr := .Errors.Gender }}{{ if $genderErr }}{{ $genderErr }}{{ end }}</p>
 
             <label>Любимый язык программирования:</label>
             <select multiple id="langs" name="langs[]" size="6">
@@ -45,9 +49,11 @@
                 <option value="scala" {{ if .Contains "scala" }} selected {{ end }}>Scala</option>
                 <option value="go" {{ if .Contains "go" }} selected {{ end }}>Go</option>
             </select>
+            <p class="error">{{ $langsErr := .Errors.Langs }}{{ if $langsErr }}{{ $langsErr }}{{ end }}</p>
 
             <label for="bio">Биография:</label>
-            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }} {{ if $bio }} $bio {{ end }}</textarea>
+            <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }}{{ if $bio }} $bio {{ end }}</textarea>
+            <p class="error">{{ $bioErr := .Errors.Bio }}{{ if $bioErr }}{{ $bioErr }}{{ end }}</p>
 
             <label>
                 <input type="checkbox" id="agreement" name="agreement" required>

@@ -14,7 +14,7 @@ import (
 )
 
 type (
-	loginResponse struct {
+	LoginResponse struct {
 		Login string
 		Password string
 		Message string
@@ -41,7 +41,7 @@ type (
 		Langs string
 	}
 
-	formResponse struct {
+	FormResponse struct {
 		ID string
 		Application Application
 		Errors Errors
@@ -54,7 +54,7 @@ type (
 	}
 )
 
-func (fr formResponse) Contains(lang string) bool {
+func (fr FormResponse) Contains(lang string) bool {
 	for _, s := range fr.Application.Langs {
 		if s == lang {
 			return true
@@ -189,7 +189,20 @@ func grantAccessToken(w http.ResponseWriter, email string) {
 	http.SetCookie(w, cookie)
 }
 
+func deleteCookie(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("accessToken")
+
+	if err != nil {
+		return
+	}
+
+	cookie.MaxAge = -1
+	http.SetCookie(w, cookie)
+}
+
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+	deleteCookie(w, r)
+
 	tmpl, err := template.ParseFiles("login.html")
 
 	if err != nil {
@@ -197,7 +210,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := loginResponse{}
+	response := LoginResponse{}
 	
 	if r.Method == http.MethodPost {
 		login := r.FormValue("login")
@@ -224,7 +237,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response := formResponse{ID: extractID(login)}
+		response := FormResponse{ID: extractID(login)}
 
 		response.Application, err = getApplication(response.ID)
 
