@@ -96,13 +96,9 @@ button:hover {
 .message > div {
     padding: 5px 10px;
     margin-bottom: 5px;
+    border: 1px solid #0f0;
     border-radius: 5px;
     background-color: #fff;
-}
-
-.message {
-    border: 1px solid #0f0;
-    color: #0f0;
 }
 
 .warning {
@@ -115,7 +111,7 @@ button:hover {
     color: red;
 }
 
-.warning_green {
+.message, .warning_green {
     color: #0f0;
 }
 

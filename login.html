@@ -12,10 +12,10 @@
 
         <form action="main.cgi" method="post">
             <label for="login">Логин:</label>
-            <input type="text" id="login" name="login">
+            <input type="text" id="login" name="login" {{ $login := .Login }} {{ if $login }} value="{{ $login }}" {{ end }}>
 
             <label for="password">Пароль:</label>
-            <input type="password" id="password" name="password">
+            <input type="password" id="password" name="password" {{ $password := .Password }} {{ if $password }} value="{{ $password }}" {{ end }}>
 
             <div class="warning {{ .Type }}">{{ .Message }}</div>
 
