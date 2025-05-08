@@ -9,7 +9,7 @@
 <body>
     <div class="form-container">
         <h2>Добро пожаловать!</h2>
-        <form action="main.cgi?action=form?id={{ .ID }}" method="post">
+        <form action="main.cgi?action=form&id={{ .ID }}" method="post">
             <label for="fio">ФИО:</label>
             <input type="text" id="fio" name="fio" placeholder="Введите ФИО" {{ $fio := .Application.Fio }} {{ if $fio }} value="{{ $fio }}" {{ end }}>
             <p class="warning warning_red">{{ $fioErr := .Errors.Fio }}{{ if $fioErr }}{{ $fioErr }}{{ end }}</p>
@@ -24,7 +24,12 @@
 
             <label for="birthdate">Дата рождения:</label>
             <input type="date" id="birthdate" name="birthdate" value="{{ .Application.Birthdate }}">
-            <p class="warning warning_red">{{ $birthdateErr := .Errors.Birthdate }}{{ if $birthdateErr }}{{ $birthdateErr }}{{ end }}</p>
+            <p class="warning warning_red">
+            {{ $birthdateErr := .Errors.Birthdate }}
+            {{ if $birthdateErr }}
+                {{ $birthdateErr }}
+            {{ end }}
+            </p>
 
             <div class="gender">
                 <label>Пол:</label>
@@ -33,7 +38,12 @@
                 <input type="radio" id="female" name="gender" value="female" {{ if eq .Application.Gender "female" }} checked {{ end }}>
                 <label for="female">Женский</label>
             </div>
-            <p class="warning warning_red">{{ $genderErr := .Errors.Gender }}{{ if $genderErr }}{{ $genderErr }}{{ end }}</p>
+            <p class="warning warning_red">
+            {{ $genderErr := .Errors.Gender }}
+            {{ if $genderErr }}
+                {{ $genderErr }}
+            {{ end }}
+            </p>
 
             <label>Любимый язык программирования:</label>
             <select multiple id="langs" name="langs[]" size="6">
@@ -50,7 +60,10 @@
                 <option value="scala" {{ if .Contains "scala" }} selected {{ end }}>Scala</option>
                 <option value="go" {{ if .Contains "go" }} selected {{ end }}>Go</option>
             </select>
-            <p class="warning warning_red">{{ $langsErr := .Errors.Langs }}{{ if $langsErr }}{{ $langsErr }}{{ end }}</p>
+            <p class="warning warning_red">
+            {{ $langsErr := .Errors.Langs }}
+            {{ if $langsErr }}{{ $langsErr }}{{ end }}
+            </p>
 
             <label for="bio">Биография:</label>
             <textarea id="bio" name="bio" rows="4" placeholder="Введите вашу биографию">{{ $bio := .Application.Bio }}{{ if $bio }}{{ $bio }}{{ end }}</textarea>
