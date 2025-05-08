@@ -9,7 +9,7 @@
 <body>
     <div class="form-container">
         <h2>Добро пожаловать!</h2>
-        <form action="main.cgi?action=form" method="post">
+        <form action="main.cgi?action=form?id={{ .ID }}" method="post">
             <label for="fio">ФИО:</label>
             <input type="text" id="fio" name="fio" placeholder="Введите ФИО" {{ $fio := .Application.Fio }} {{ if $fio }} value="{{ $fio }}" {{ end }}>
             <p class="warning warning_red">{{ $fioErr := .Errors.Fio }}{{ if $fioErr }}{{ $fioErr }}{{ end }}</p>

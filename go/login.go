@@ -158,7 +158,7 @@ func getApplication(id string) (Application, error) {
 	return appl, nil
 }
 
-func grantAccessToken(w http.ResponseWriter, email string) {
+func grantAccessToken(w http.ResponseWriter) {
 	payload := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 	}
@@ -238,7 +238,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		grantAccessToken(w, response.ID)
+		grantAccessToken(w)
 
 		tmpl.Execute(w, response)
 		return
