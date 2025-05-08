@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -117,7 +119,25 @@ func updateApplication(id string, appl Application) error {
 		return err
 	}
 
-	for _, pl := range appl.Langs {
+	err = insertPL(appl.Langs, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func insertPL(langs []string, id string) error {
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	for _, pl := range langs {
 		plid := ""
 
 		sel, err := db.Query(`
@@ -130,7 +150,7 @@ func updateApplication(id string, appl Application) error {
 			return err
 		}
 
-		sel.Close()
+		defer sel.Close()
 		
 		for sel.Next() {
 			err := sel.Scan(&plid)
@@ -151,6 +171,111 @@ func updateApplication(id string, appl Application) error {
 	}
 
 	return nil
+}
+
+func insertApplication(id string, appl Application) error {
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec(`
+       INSERT INTO APPLICATION
+	   VALUES (?, ?, ?, ?, ?, ?, ?);
+	`, id, appl.Fio, appl.Phone, appl.Email, appl.Birthdate, appl.Gender, appl.Bio)
+
+	if err != nil {
+		return err
+	}
+
+	err = insertPL(appl.Langs, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func insertUser(login string, password string) error {
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec(`
+		INSERT INTO USER
+		VALUES (?, ?);
+	`, login, password)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func generateLAP() (string, string, error) {
+	var login = "u0000000"
+	var password string
+	
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return login, password, err
+	}
+
+	defer db.Close()
+
+	sel, err := db.Query(`
+		SELECT LOGIN
+		FROM USER
+		ORDER BY LOGIN DESC 
+		LIMIT 1;
+	`)
+
+	if err != nil {
+		return login, password, err
+	}
+
+	for sel.Next() {
+		err := sel.Scan(&login)
+
+		if err != nil {
+			return login, password, err
+		}
+	}
+
+	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?`~"
+
+	for i := 0; i < 8; i++ {
+		password += string(chars[rand.Intn(len(chars))])
+	}
+
+	return increaseByOne(login), password, nil
+}
+
+func increaseByOne(str string) string {
+	digits := "0123456789"
+	res := ""
+
+	p := len(str) - 1
+
+	for str[p] == '9' {
+		res += "0"
+		p--
+	}
+
+	q := strings.Index(digits, string(str[p])) + 1
+	res = string(digits[q]) + res
+
+	return str[:p] + res
 }
 
 func formHandler(w http.ResponseWriter, r *http.Request) {
@@ -195,8 +320,6 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if id != "" && isAuthorized(r) {
-			fmt.Fprintf(w, "%v", response);
-			return
 			err := updateApplication(id, appl)
 
 			if err != nil {
@@ -216,16 +339,29 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 			response.Type = "warning_red"
 			response.Message = "Для выполнения этого действия необходимо авторизоваться"
 		} else {
-			//insertApplication(appl)
-			//login, password, err := generateLAP()
+			login, password, err := generateLAP()
 
-			// if err != nil {
-			// 	fmt.Fprintf(w, "MySQL error: %v", err)
-			// 	return
-			// }
+			if err != nil {
+				fmt.Fprintf(w, "MySQL error: %v", err)
+				return
+			}
 
-			response.Login = "u0000002";
-			response.Password = "qwertyman2345678";
+			err = insertUser(login, password)
+
+			if err != nil {
+				fmt.Fprintf(w, "MySQL error: %v", err)
+				return
+			}
+
+			err = insertApplication(extractID(login),appl)
+
+			if err != nil {
+				fmt.Fprintf(w, "MySQL error: %v", err)
+				return
+			}
+
+			response.Login = login;
+			response.Password = password;
 			response.Type = "warning_green"
 			response.Message = "Вы успешно зарегистрировались. Перед нажатием на кнопку Войти сохраните ваш логин и пароль!"
 		}
