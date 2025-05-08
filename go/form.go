@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	"math/rand"
@@ -212,7 +213,7 @@ func insertUser(login string, password string) error {
 	_, err = db.Exec(`
 		INSERT INTO USER
 		VALUES (?, ?);
-	`, login, password)
+	`, login, string(sha256.Sum256([]byte(password))))
 
 	if err != nil {
 		return err
@@ -224,7 +225,7 @@ func insertUser(login string, password string) error {
 func generateLAP() (string, string, error) {
 	var login = "u0000000"
 	var password string
-	
+
 	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
 
 	if err != nil {
