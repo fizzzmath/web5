@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -88,6 +89,70 @@ func isAuthorized(r *http.Request) bool {
 	return err == nil && token.Valid
 }
 
+func updateApplication(id string, appl Application) error {
+	db, err := sql.Open("mysql", "u68867:6788851@/u68867")
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec(`
+		UPDATE APPLICATION
+		SET FIO = ?, PHONE = ?, EMAIL = ?, BIRTHDATE = ?, GENDER = ?, BIO = ?
+		WHERE ID = ?;
+	`, appl.Fio, appl.Phone, appl.Email, appl.Birthdate, appl.Gender, appl.Bio, id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		DELETE FROM FAVORITE_PL
+		WHERE APPLICATION_ID = ?;
+	`, id)
+
+	if err != nil {
+		return err
+	}
+
+	for _, pl := range appl.Langs {
+		plid := ""
+
+		sel, err := db.Query(`
+			SELECT ID
+			FROM PL
+			WHERE NAME = ?;
+		`, pl)
+
+		if err != nil {
+			return err
+		}
+
+		sel.Close()
+		
+		for sel.Next() {
+			err := sel.Scan(&plid)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = db.Exec(`
+			INSERT INTO FAVORITE_PL
+			VALUES (?, ?);
+		`, id, plid)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func formHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("form.html")
 
@@ -130,12 +195,12 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if id != "" && isAuthorized(r) {
-			// err := updateApplication(appl)
+			err := updateApplication(id, appl)
 
-			// if err != nil {
-			// 	fmt.Fprintf(w, "MySQL error: %v", err)
-			// 	return
-			// }
+			if err != nil {
+				fmt.Fprintf(w, "MySQL error: %v", err)
+				return
+			}
 
 			response.Message = "Ваши данные успешно изменены!"
 
