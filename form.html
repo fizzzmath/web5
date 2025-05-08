@@ -76,6 +76,13 @@
 
             <button type="submit">Сохранить</button>
         </form>
+
+        <div class="message">
+        {{ $message := .Message }}
+        {{ if $message }}
+            <div class="success">{{ $message }}</div>
+        {{ end }}
+        </div>
     </div>
 </body>
 </html>
