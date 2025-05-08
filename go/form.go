@@ -195,6 +195,8 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if id != "" && isAuthorized(r) {
+			fmt.Fprintf(w, "%v", response);
+			return
 			err := updateApplication(id, appl)
 
 			if err != nil {
