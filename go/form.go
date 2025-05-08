@@ -100,7 +100,7 @@ func updateApplication(id string, appl Application) error {
 
 	_, err = db.Exec(`
 		UPDATE APPLICATION
-		SET FIO = ?, PHONE = ?, EMAIL = ?, BIRTHDATE = ?, GENDER = ?, BIO = ?
+		SET NAME = ?, PHONE = ?, EMAIL = ?, BIRTHDATE = ?, GENDER = ?, BIO = ?
 		WHERE ID = ?;
 	`, appl.Fio, appl.Phone, appl.Email, appl.Birthdate, appl.Gender, appl.Bio, id)
 
