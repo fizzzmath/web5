@@ -81,7 +81,7 @@ func isAuthorized(r *http.Request) bool {
 		return false
 	}
 
-	token, err := jwt.ParseWithClaims(cookie.Value, jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(cookie.Value, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("access-token-secret-key"), nil
 	})
 
@@ -129,7 +129,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if response.ID != "" && isAuthorized(r) {
+		if id != "" && isAuthorized(r) {
 			// err := updateApplication(appl)
 
 			// if err != nil {
