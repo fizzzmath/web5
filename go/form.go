@@ -213,7 +213,7 @@ func insertUser(login string, password string) error {
 	_, err = db.Exec(`
 		INSERT INTO USER
 		VALUES (?, ?);
-	`, login, string(sha256.Sum256([]byte(password))))
+	`, login, fmt.Sprintf("%x", sha256.Sum256([]byte(password))))
 
 	if err != nil {
 		return err
